@@ -1,0 +1,106 @@
+
+trigger:
+- main
+- test
+- dev
+- demo
+
+pool:
+  vmImage: ubuntu-latest
+
+
+
+
+jobs:
+- ${{ if or(eq(variables['Build.SourceBranchName'], 'dev'), eq(variables['System.PullRequest.TargetBranch'], 'dev')) }}:
+  - job: dev
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '10.x'
+      displayName: 'Install Node.js'
+    - script: |
+        npm install
+        npm run build:dev
+      displayName: 'npm install and build'
+    - task: CopyFiles@2
+      inputs:
+        Contents: 'build/**' # Pull the build directory (React)
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: PublishBuildArtifacts@1
+      inputs: 
+        PathtoPublish: $(Build.ArtifactStagingDirectory) # dist or build files
+        ArtifactName: 'dev' # output artifact named www
+
+- ${{ elseif or(eq(variables['Build.SourceBranchName'], 'test'), eq(variables['System.PullRequest.TargetBranch'], 'test')) }}:
+  - job: test
+
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '10.x'
+      displayName: 'Install Node.js'
+    - script: |
+        npm install
+
+        npm run build:test
+
+      displayName: 'npm install and build'
+    - task: CopyFiles@2
+      inputs:
+        Contents: 'build/**' # Pull the build directory (React)
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: PublishBuildArtifacts@1
+      inputs: 
+        PathtoPublish: $(Build.ArtifactStagingDirectory) # dist or build files
+
+        ArtifactName: 'test' # output artifact named www
+
+
+
+- ${{ elseif or(eq(variables['Build.SourceBranchName'], 'main'), eq(variables['System.PullRequest.TargetBranch'], 'main')) }}:
+  - job: prod
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '10.x'
+      displayName: 'Install Node.js'
+    - script: |
+        npm install
+        npm run build:prod
+      displayName: 'npm install and build'
+    - task: CopyFiles@2
+      inputs:
+        Contents: 'build/**' # Pull the build directory (React)
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: PublishBuildArtifacts@1
+      inputs: 
+        PathtoPublish: $(Build.ArtifactStagingDirectory) # dist or build files
+        ArtifactName: 'prod' # output artifact named www
+
+- ${{ elseif or(eq(variables['Build.SourceBranchName'], 'demo'), eq(variables['System.PullRequest.TargetBranch'], 'demo')) }}:
+  - job: demo
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '10.x'
+      displayName: 'Install Node.js'
+    - script: |
+        npm install
+        npm run build:demo
+      displayName: 'npm install and build'
+    - task: CopyFiles@2
+      inputs:
+        Contents: 'build/**' # Pull the build directory (React)
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: PublishBuildArtifacts@1
+      inputs: 
+        PathtoPublish: $(Build.ArtifactStagingDirectory) # dist or build files
+
+        ArtifactName: 'demo' # output artifact named www
+
+
